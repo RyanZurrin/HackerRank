@@ -382,19 +382,49 @@ long countTriplets(vector<long> arr, long r) {
 long getMinimumCost(vector<int> arr) {
     long cost = 0;
     long min_cost = 0;
-    map<pair<int, int>, pair<int, long>> m;
+    long max_val = 0;
+    map<int, long> m;
     // use dp to store the minimum cost of the array after inserting one element
     for (int i = 0; i < arr.size()-1; i++) {
-        m.insert(make_pair(make_pair(arr[i], arr[i+1]), make_pair(pow(arr[i+1] - arr[i], 2), i)));
-        cost += pow(arr[i+1] - arr[i], 2);
+        // insert i+1, (long)pow(arr[i+1] - arr[i], 2) int the map
+        cost += (long)pow(arr[i+1] - arr[i], 2);
+        m[i+1] = (long)pow(arr[i+1] - arr[i], 2);
     }
-    // print the hash table
-    for (auto& it : m) {
-        cout << it.first.first << " " << it.first.second << " " << it.second.first << " " << it.second.second << endl;
+    min_cost = cost;
+    int indexToInsertAt = 0;
+    for (auto & it : m) {
+        if (it.second > max_val) {
+            max_val = it.second;
+            indexToInsertAt = it.first;
+        }
     }
+    // print max val and index to insert at
+    cout << "max val: " << max_val << " index to insert at: " << indexToInsertAt << endl;
 
-
-    return cost;
+    for (int i = 0; i < max_val; i++) {
+        bool flag = false;
+        vector<int> new_arr(arr.size()+1);
+        for (int j = 0; j < new_arr.size(); j++) {
+            if (j == indexToInsertAt) {
+                new_arr[j] = i+1;
+                flag = true;
+            } else {
+                if (flag) {
+                    new_arr[j] = arr[j-1];
+                } else {
+                    new_arr[j] = arr[j];
+                }
+            }
+        }
+        cost = 0;
+        for (int i_ = 0; i_ < new_arr.size() - 1; i_++) {
+            cost += (long)pow(new_arr[i_ + 1] - new_arr[i_], 2);
+        }
+        if (cost < min_cost) {
+            min_cost = cost;
+        }
+    }
+    return min_cost;
 }
 
 /**

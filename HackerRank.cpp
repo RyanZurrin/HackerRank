@@ -5,7 +5,7 @@
 
 
 int main () {
-    vector<int> arr = {1,3,5,2,10};
+    vector<int> arr = {4,7,1,4};
     cout << getMinimumCost(arr) << endl;
 
     return 0;
