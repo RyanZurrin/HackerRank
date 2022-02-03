@@ -5,10 +5,8 @@
 
 
 int main () {
-    vector<int> v = {1, 2, 3, 4, 5};
-    auto n = v.size();
-    cout << "left rotation: " << endl;
-    printVector(rotLeft(v, 3));
+    vector<int> arr = {1,3,5,2,10};
+    cout << getMinimumCost(arr) << endl;
 
     return 0;
 }
