@@ -428,105 +428,80 @@ long getMinimumCost(vector<int> arr) {
 }
 
 /**
- * There are n balls placed on a 1-dimensional axis with each of them moving with
- * the same non-zero speed. direction[i] represents the direction in which the ith
- * ball is moving, with -1 meaning left and 1 meaning right.The strength of the ith
- * ball is described by strength[i]. If e balls collide, the one with the higher strength
- * destroys the smaller one. If both have the same strength, both are destroyed.
- * Return a list of the indices of the balls that remain after all the collisions
- * have occurred, in ascending order.
+  There are n balls placed on a 1-dimensional axis with each of them moving with
+  the same non-zero speed. direction[i] represents the direction in which the ith
+  ball is moving, with -1 meaning left and 1 meaning right.The strength of the ith
+  ball is described by strength[i]. If e balls collide, the one with the higher strength
+  destroys the smaller one. If both have the same strength, both are destroyed.
+  Return a list of the indices of the balls that remain after all the collisions
+  have occurred, in ascending order.
  * @param direction the direction of the balls
  * @param strength the strength of the balls
  * @return the indices of the balls that remain after all the collisions have occurred, in ascending order
  */
 vector<int> findRemainingBalls(vector<int> direction, vector<int> strength) {
-    vector<int> balls;
-    for (int i = 0; i < direction.size(); i++) {
-        balls.push_back(i);
-    }
-    sort(balls.begin(), balls.end(), [&](int i, int j) {
-        return strength[i] > strength[j];
-    });
-    vector<int> res;
-    for (int i = 0; i < balls.size(); i++) {
-        if (direction[balls[i]] == 1) {
-            res.push_back(balls[i]);
+    // create a stack to store the balls that are still moving
+    stack<int> s;
+    int i = 0;
+    while (i < strength.size()) {
+        int ball = strength[i];
+        int dir = direction[i];
+        if (s.empty()) {
+            s.push(i);
+        } else {
+            int top = s.top();
+            if (direction[top] > 0 && dir < 0) {
+                if (strength[top] == ball) {
+                   s.pop();
+                } else if (strength[top] < ball) {
+                    s.pop();
+                    continue;
+                }
+            } else {
+                s.push(i);
+            }
         }
+        i++;
     }
+    vector<int> res;
+    while (!s.empty()) {
+        res.push_back(s.top());
+        s.pop();
+    }
+    // sort the result
     sort(res.begin(), res.end());
     return res;
 }
 /**
- * Non-critical request for a transaction system are routed through a throttling
- * gateway to ensure that the network is not choked by non-essential requests.
- * The gateway has the following limits:
- * - the number of transactions in any given second cannot exceed 3.
- * - the number of transactions in any given 10 second period cannot exceed 20. A
- *    10 second period includes all requests arriving from any time max(1, T-9) to
- *    T (inclusive of both) for any valid time T.
- * - the number of transactions in any given minute cannot exceed 60. Similar to
- *   above, 1 minute is from max(1, T-59) to T (inclusive of both).
- * Any request that exceeds any of the above limits will be dropped by the gateway. Given
- * the times at which different requests arrive sorted ascending, find how many
- * requests will be dropped.
- * Note: Even if a request is dropped it is still considered for future calculations.
- * Although, if a request is to be dropped due to multiple violations, it is still
- * counted only once.
+  Non-critical request for a transaction system are routed through a throttling
+  gateway to ensure that the network is not choked by non-essential requests.
+  The gateway has the following limits:
+  - the number of transactions in any given second cannot exceed 3.
+  - the number of transactions in any given 10 second period cannot exceed 20. A
+     10 second period includes all requests arriving from any time max(1, T-9) to
+     T (inclusive of both) for any valid time T.
+  - the number of transactions in any given minute cannot exceed 60. Similar to
+    above, 1 minute is from max(1, T-59) to T (inclusive of both).
+  Any request that exceeds any of the above limits will be dropped by the gateway. Given
+  the times at which different requests arrive sorted ascending, find how many
+  requests will be dropped.
+  Note: Even if a request is dropped it is still considered for future calculations.
+  Although, if a request is to be dropped due to multiple violations, it is still
+  counted only once.
  * @param requestTime
  * @return
  */
 int droppedRequests(vector<int> requestTime) {
-    int dropped_req = 0;
-    vector<int> req_count(60, 0);
-    int curr_req = 0;
+    int dropped = 0;
     for (int i = 0; i < requestTime.size(); i++) {
-        if (curr_req > 3) {
-            dropped_req++;
+        if (i > 2 && requestTime[i] == requestTime[i-3]) {
+            dropped++;
+        } else if (i > 19 && (requestTime[i] - requestTime[i-20]) < 10) {
+            dropped++;
+        } else if (i > 59 && (requestTime[i] - requestTime[i-60]) <= 60) {
+            dropped++;
         }
-        if (req_count[requestTime[i] % 60] > 20) {
-            dropped_req++;
-        }
-        if (req_count[(requestTime[i] - 9) % 60] > 20) {
-            dropped_req++;
-        }
-        if (req_count[(requestTime[i] - 59) % 60] > 20) {
-            dropped_req++;
-        }
-        req_count[requestTime[i] % 60]++;
-        req_count[(requestTime[i] - 9) % 60]++;
-        req_count[(requestTime[i] - 59) % 60]++;
-        curr_req++;
     }
-    return requestTime.size() - dropped_req;
-
+    return dropped;
 }
-/*
- * def droppedRequest(requestTime):
-
-    dropped = 0
-	# this is to keep track of any of the element that is already dropped due to any of 3 limit violation.
-    already_dropped = {}
-
-    for i in range(len(requestTime)):
-        if i > 2 and requestTime[i] == requestTime[i-3]:
-            if requestTime[i] not in already_dropped or already_dropped[requestTime[i]] != i:
-                already_dropped[requestTime[i]] = i
-                dropped += 1
-                print(i, requestTime[i])
-
-        elif i > 19 and requestTime[i] - requestTime[i-20] < 10:
-            if requestTime[i] not in already_dropped or already_dropped[requestTime[i]] != i:
-                already_dropped[requestTime[i]] = i
-                dropped += 1
-                print(i, requestTime[i])
-
-        elif i > 59 and requestTime[i] - requestTime[i-60] < 60:
-            if requestTime[i] not in already_dropped or already_dropped[requestTime[i]] != i:
-                already_dropped[requestTime[i]] = i
-                dropped += 1
-                print(i, requestTime[i])
-
-    return dropped
- */
-
 #endif //HACKERRANK_HACKER_H

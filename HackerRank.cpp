@@ -5,8 +5,8 @@
 
 
 int main () {
-    vector<int> arr = {4,7,1,4};
-    cout << getMinimumCost(arr) << endl;
+    vector<int> requests = {1,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7};
+    cout << droppedRequests(requests) << endl;
 
     return 0;
 }
